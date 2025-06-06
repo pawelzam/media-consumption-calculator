@@ -1,0 +1,66 @@
+[
+  {
+    "guid": "a1b2c3d4-e5f6-4a5b-9c8d-7e6f5d4c3b2a",
+    "date": "2024-10-21",
+    "power": "0",
+    "gas": "20",
+    "water": "2",
+    "gasPercentage": "50"
+  },
+  {
+    "guid": "b2c3d4e5-f6g7-5b6c-0d9e-8f7g6e5d4c3b",
+    "date": "2024-11-21",
+    "power": "105",
+    "gas": "372",
+    "water": "6",
+    "gasPercentage": "50"
+  },
+  {
+    "guid": "c3d4e5f6-g7h8-6c7d-1e0f-9g8h7f6e5d4c",
+    "date": "2024-12-22",
+    "power": "205",
+    "gas": "463",
+    "water": "8",
+    "gasPercentage": "50"
+  },
+  {
+    "guid": "d4e5f6g7-h8i9-7d8e-2f1g-0h9i8g7f6e5d",
+    "date": "2025-01-22",
+    "power": "353",
+    "gas": "698",
+    "water": "12",
+    "gasPercentage": "50"
+  },
+  {
+    "guid": "e5f6g7h8-i9j0-8e9f-3g2h-1i0j9h8g7f6e",
+    "date": "2025-02-22",
+    "power": "478",
+    "gas": "917",
+    "water": "17",
+    "gasPercentage": "50"
+  },
+  {
+    "guid": "f6g7h8i9-j0k1-9f0g-4h3i-2j1k0i9h8g7f",
+    "date": "2025-04-05",
+    "power": "603",
+    "gas": "1174",
+    "water": "25",
+    "gasPercentage": "50"
+  },
+  {
+    "guid": "g7h8i9j0-k1l2-0g1h-5i4j-3k2l1j0i9h8g",
+    "date": "2025-04-26",
+    "power": "710",
+    "gas": "1253",
+    "water": "28",
+    "gasPercentage": "50"
+  },
+  {
+    "guid": "h8i9j0k1-l2m3-1h2i-6j5k-4l3m2k1j0i9h",
+    "date": "2025-05-22",
+    "power": "820",
+    "gas": "1360",
+    "water": "33",
+    "gasPercentage": "50"
+  }
+]
