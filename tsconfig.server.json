@@ -10,7 +10,8 @@
     "rootDir": "src",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "allowJs": true
   },
   "include": ["src/server/**/*"],
   "exclude": ["node_modules"]

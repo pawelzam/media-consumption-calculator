@@ -20,8 +20,13 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Determine the build directory path
+const buildPath = process.env.NODE_ENV === 'production'
+  ? path.join(__dirname, '../client/build')  // In production
+  : path.join(__dirname, '../../build');     // In development
+
 // Serve static files from the React build
-app.use(express.static(path.join(__dirname, '../../build')));
+app.use(express.static(buildPath));
 
 // Initialize calculators
 const gasCalculator = new GasCalculator();
@@ -86,17 +91,6 @@ app.get('/api/apartments', (req, res) => {
   res.json(apartments);
 });
 
-// GET all consumption entries for an apartment
-app.get('/api/consumption/:apartment', (req, res) => {
-  try {
-    const { apartment } = req.params;
-    const data = readData(apartment);
-    res.json(data);
-  } catch (error) {
-    res.status(400).json({ error: 'Invalid apartment' });
-  }
-});
-
 // GET gas consumption calculations for an apartment
 app.get('/api/consumption/:apartment/gas-calculations', (req, res) => {
   try {
@@ -151,113 +145,91 @@ app.get('/api/consumption/:apartment/water-calculations', (req, res) => {
   }
 });
 
-// POST new consumption entry
+// POST new reading for an apartment
 app.post('/api/consumption/:apartment', (req, res) => {
   try {
     const { apartment } = req.params;
-    const { date, power, gas, water, gasPercentage, powerReduction } = req.body;
+    const reading = req.body;
     
-    // Validate required fields
-    if (!date || !power || !gas || !water) {
-      return res.status(400).json({ error: 'All fields are required' });
-    }
-
-    const newEntry = {
-      guid: uuidv4(),
-      date,
-      power,
-      gas,
-      water,
-      gasPercentage: gasPercentage || '50',
-      powerReduction: powerReduction || 0
+    // Add ID and timestamp if not provided
+    const newReading = {
+      id: reading.id || uuidv4(),
+      timestamp: reading.timestamp || new Date().toISOString(),
+      ...reading
     };
 
-    const data = readData(apartment);
-    data.push(newEntry);
-    
+    // Get existing data
+    let data = readData(apartment);
+    if (!Array.isArray(data)) {
+      data = [];
+    }
+
+    // Add new reading
+    data.push(newReading);
+
+    // Sort by timestamp
+    data.sort((a: { timestamp: string }, b: { timestamp: string }) => 
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+
+    // Write back to file
     if (writeData(apartment, data)) {
-      res.status(201).json(newEntry);
+      res.status(201).json(newReading);
     } else {
-      res.status(500).json({ error: 'Failed to save data' });
+      res.status(500).json({ error: 'Failed to save reading' });
     }
   } catch (error) {
-    console.error('Error in POST /api/consumption:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error saving consumption reading:', error);
+    res.status(500).json({ error: 'Failed to save reading' });
   }
 });
 
-// PUT update consumption entry
-app.put('/api/consumption/:apartment/:guid', (req, res) => {
+// DELETE reading from an apartment
+app.delete('/api/consumption/:apartment/:readingId', (req, res) => {
   try {
-    const { apartment, guid } = req.params;
-    const { date, power, gas, water, gasPercentage, powerReduction } = req.body;
-
-    // Validate required fields
-    if (!date || !power || !gas || !water) {
-      return res.status(400).json({ error: 'All fields are required' });
+    const { apartment, readingId } = req.params;
+    
+    // Get existing data
+    let data = readData(apartment);
+    if (!Array.isArray(data)) {
+      return res.status(404).json({ error: 'No data found for apartment' });
     }
 
-    // Validate gas percentage if provided
-    if (gasPercentage !== undefined) {
-      const percentage = Number(gasPercentage);
-      if (isNaN(percentage) || percentage < 0 || percentage > 100) {
-        return res.status(400).json({ error: 'Gas percentage must be between 0 and 100' });
-      }
-    }
-
-    const data = readData(apartment);
-    const index = data.findIndex((entry: any) => entry.guid === guid);
-
+    // Find and remove reading
+    const index = data.findIndex(reading => reading.id === readingId);
     if (index === -1) {
-      return res.status(404).json({ error: 'Entry not found' });
+      return res.status(404).json({ error: 'Reading not found' });
     }
 
-    data[index] = {
-      guid,
-      date,
-      power,
-      gas,
-      water,
-      gasPercentage: gasPercentage || '50',
-      powerReduction: powerReduction || 0
-    };
+    data.splice(index, 1);
 
+    // Write back to file
     if (writeData(apartment, data)) {
-      res.json(data[index]);
+      res.status(200).json({ message: 'Reading deleted successfully' });
     } else {
-      res.status(500).json({ error: 'Failed to update data' });
+      res.status(500).json({ error: 'Failed to delete reading' });
     }
   } catch (error) {
-    console.error('Error in PUT /api/consumption/:apartment/:guid:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error deleting consumption reading:', error);
+    res.status(500).json({ error: 'Failed to delete reading' });
   }
 });
 
-// DELETE consumption entry
-app.delete('/api/consumption/:apartment/:guid', (req, res) => {
+// GET all readings for an apartment
+app.get('/api/consumption/:apartment', (req, res) => {
   try {
-    const { apartment, guid } = req.params;
+    const { apartment } = req.params;
     const data = readData(apartment);
-    const filteredData = data.filter((entry: any) => entry.guid !== guid);
-
-    if (data.length === filteredData.length) {
-      return res.status(404).json({ error: 'Entry not found' });
-    }
-
-    if (writeData(apartment, filteredData)) {
-      res.json({ message: 'Entry deleted successfully' });
-    } else {
-      res.status(500).json({ error: 'Failed to delete entry' });
-    }
+    res.json(data);
   } catch (error) {
-    console.error('Error in DELETE /api/consumption/:apartment/:guid:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error retrieving consumption readings:', error);
+    res.status(500).json({ error: 'Failed to retrieve readings' });
   }
 });
 
 // Serve React app for any unmatched routes
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../build/index.html'));
+  res.sendFile(path.join(buildPath, 'index.html'));
 });
 
 app.listen(port, () => {
