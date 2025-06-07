@@ -1,5 +1,5 @@
-import { Application, Request, Response } from 'express';
 import express from 'express';
+import type { Application } from 'express';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
