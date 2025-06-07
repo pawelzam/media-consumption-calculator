@@ -36,6 +36,7 @@ interface ConsumptionData {
   gas: string;
   power: string;
   water: string;
+  powerReduction: number;
 }
 
 class PowerCalculator {
@@ -48,7 +49,7 @@ class PowerCalculator {
   }
 
   calculate(previousMetric: ConsumptionData, currentMetric: ConsumptionData, billingUnitsCount: number): Usage {
-    const consumption = Number(currentMetric.power) - Number(previousMetric.power);
+    const consumption = Number(currentMetric.power) - Number(previousMetric.power) - Number(currentMetric.powerReduction);
     
     const activeEnergy = Number((consumption * this.options.ActiveEnergy).toFixed(2));
     const resFee = Number((consumption * this.options.RESFee).toFixed(2));

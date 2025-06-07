@@ -50,6 +50,7 @@ interface ConsumptionData {
   gas: string;
   water: string;
   gasPercentage: string;
+  powerReduction: number;
 }
 
 interface SavedConsumptionData {
@@ -59,6 +60,7 @@ interface SavedConsumptionData {
   gas: string;
   water: string;
   gasPercentage: string;
+  powerReduction: number;
 }
 
 interface GasCalculation {
@@ -143,7 +145,8 @@ const ConsumptionForm: React.FC = () => {
     power: '',
     gas: '',
     water: '',
-    gasPercentage: '100'
+    gasPercentage: '100',
+    powerReduction: 0
   });
 
   const [selectedApartment, setSelectedApartment] = useState<string>('');
@@ -311,7 +314,15 @@ const ConsumptionForm: React.FC = () => {
 
   const handleEdit = (row: SavedConsumptionData) => {
     setEditingGuid(row.guid);
-    setEditData({ ...row });
+    setEditData({
+      guid: row.guid,
+      date: row.date,
+      power: row.power,
+      gas: row.gas,
+      water: row.water,
+      gasPercentage: row.gasPercentage,
+      powerReduction: row.powerReduction
+    });
   };
 
   const handleCancelEdit = () => {
@@ -348,7 +359,14 @@ const ConsumptionForm: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(editData),
+        body: JSON.stringify({
+          date: editData.date,
+          power: editData.power,
+          gas: editData.gas,
+          water: editData.water,
+          gasPercentage: editData.gasPercentage,
+          powerReduction: editData.powerReduction
+        }),
       });
 
       if (!response.ok) {
@@ -384,7 +402,7 @@ const ConsumptionForm: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = event.target.value;
-    if (field === 'power' || field === 'gas' || field === 'water' || field === 'gasPercentage') {
+    if (field === 'power' || field === 'gas' || field === 'water' || field === 'gasPercentage' || field === 'powerReduction') {
       if (value === '' || (Number(value) >= 0)) {
         setFormData(prev => ({
           ...prev,
@@ -435,7 +453,8 @@ const ConsumptionForm: React.FC = () => {
         power: formData.power,
         gas: formData.gas,
         water: formData.water,
-        gasPercentage: formData.gasPercentage
+        gasPercentage: formData.gasPercentage,
+        powerReduction: formData.powerReduction
       };
 
       const response = await fetch(`http://localhost:3001/api/consumption/${selectedApartment}`, {
@@ -465,7 +484,8 @@ const ConsumptionForm: React.FC = () => {
         power: '',
         gas: '',
         water: '',
-        gasPercentage: '100'
+        gasPercentage: '100',
+        powerReduction: 0
       });
 
       await fetchSavedData();
@@ -566,6 +586,16 @@ const ConsumptionForm: React.FC = () => {
             type="number"
             value={editData.power}
             onChange={handleEditChange('power')}
+            size="small"
+            InputProps={{ inputProps: { min: 0 } }}
+            sx={{ width: '70px' }}
+          />
+        </TableCell>
+        <TableCell align="right">
+          <TextField
+            type="number"
+            value={editData.powerReduction}
+            onChange={handleEditChange('powerReduction')}
             size="small"
             InputProps={{ inputProps: { min: 0 } }}
             sx={{ width: '70px' }}
@@ -975,6 +1005,17 @@ Suma ${totalCost} zł`;
           />
 
           <TextField
+            label="Power Reduction"
+            type="number"
+            value={formData.powerReduction}
+            onChange={handleInputChange('powerReduction')}
+            InputProps={{
+              inputProps: { min: 0, step: 'any' }
+            }}
+            helperText="Power reduction in kWh (optional)"
+          />
+
+          <TextField
             label="Gas Consumption"
             type="number"
             value={formData.gas}
@@ -1083,6 +1124,7 @@ Suma ${totalCost} zł`;
                     Date
                   </TableCell>
                   <TableCell align="right" sx={{ width: '80px' }}>Power</TableCell>
+                  <TableCell align="right" sx={{ width: '80px' }}>Power Red.</TableCell>
                   <TableCell align="right" sx={{ width: '120px' }}>Power Cons. [kWh]</TableCell>
                   <TableCell align="right" sx={{ width: '80px' }}>Gas</TableCell>
                   <TableCell align="right" sx={{ width: '100px' }}>Gas %</TableCell>
@@ -1135,6 +1177,7 @@ Suma ${totalCost} zł`;
                         {row.date}
                       </TableCell>
                       <TableCell align="right">{row.power}</TableCell>
+                      <TableCell align="right">{row.powerReduction}</TableCell>
                       <TableCell align="right">
                         {powerCalc ? powerCalc.consumption.toFixed(1) : '-'}
                       </TableCell>

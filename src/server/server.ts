@@ -146,7 +146,7 @@ app.get('/api/consumption/:apartment/water-calculations', (req, res) => {
 app.post('/api/consumption/:apartment', (req, res) => {
   try {
     const { apartment } = req.params;
-    const { date, power, gas, water, gasPercentage } = req.body;
+    const { date, power, gas, water, gasPercentage, powerReduction } = req.body;
     
     // Validate required fields
     if (!date || !power || !gas || !water) {
@@ -159,7 +159,8 @@ app.post('/api/consumption/:apartment', (req, res) => {
       power,
       gas,
       water,
-      gasPercentage: gasPercentage || '50'
+      gasPercentage: gasPercentage || '50',
+      powerReduction: powerReduction || 0
     };
 
     const data = readData(apartment);
@@ -180,7 +181,7 @@ app.post('/api/consumption/:apartment', (req, res) => {
 app.put('/api/consumption/:apartment/:guid', (req, res) => {
   try {
     const { apartment, guid } = req.params;
-    const { date, power, gas, water, gasPercentage } = req.body;
+    const { date, power, gas, water, gasPercentage, powerReduction } = req.body;
 
     // Validate required fields
     if (!date || !power || !gas || !water) {
@@ -208,7 +209,8 @@ app.put('/api/consumption/:apartment/:guid', (req, res) => {
       power,
       gas,
       water,
-      gasPercentage: gasPercentage || '50'
+      gasPercentage: gasPercentage || '50',
+      powerReduction: powerReduction || 0
     };
 
     if (writeData(apartment, data)) {

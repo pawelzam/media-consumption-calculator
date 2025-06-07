@@ -5,6 +5,7 @@
     "power": "1",
     "gas": "2",
     "water": "3",
-    "gasPercentage": "50"
+    "gasPercentage": "50",
+    "powerReduction": 0
   }
 ]
