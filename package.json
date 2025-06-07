@@ -8,6 +8,8 @@
     "server": "ts-node-dev --respawn --transpile-only src/server/server.ts",
     "client": "react-scripts start",
     "build": "react-scripts build",
+    "build:server": "tsc -p tsconfig.server.json",
+    "start:prod": "node dist/server/server.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
