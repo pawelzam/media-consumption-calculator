@@ -1,13 +1,19 @@
+import { Application, Request, Response } from 'express';
 import express from 'express';
 import cors from 'cors';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import * as path from 'path';
+import * as fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
-import fs from 'fs';
-import path from 'path';
-import GasCalculator from './calculators/GasCalculator';
-import PowerCalculator from './calculators/PowerCalculator';
-import WaterCalculator from './calculators/WaterCalculator';
+import GasCalculator from './calculators/GasCalculator.js';
+import PowerCalculator from './calculators/PowerCalculator.js';
+import WaterCalculator from './calculators/WaterCalculator.js';
 
-const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const app: Application = express();
 const port = 3001;
 
 // Enable CORS
