@@ -14,11 +14,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app: Application = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 // Enable CORS
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from the React build
+app.use(express.static(path.join(__dirname, '../../build')));
 
 // Initialize calculators
 const gasCalculator = new GasCalculator();
@@ -252,7 +255,12 @@ app.delete('/api/consumption/:apartment/:guid', (req, res) => {
   }
 });
 
+// Serve React app for any unmatched routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../build/index.html'));
+});
+
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on port ${port}`);
   console.log('Available apartments:', getAvailableApartments());
 }); 
